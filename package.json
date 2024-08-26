@@ -6,7 +6,8 @@
   "scripts": {
     "watch": "npx tsc -w",
     "lint": "eslint . --ext .ts",
-    "defs": "node ./updateDefs.js"
+    "defs": "node ./updateDefs.js",
+    "filesync": "npx bitburner-filesync"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,8 @@
     "eslint": "^7.31.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "bitburner-filesync": "^1.2.0-beta4"
   }
 }
