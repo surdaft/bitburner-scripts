@@ -12,6 +12,8 @@ export async function main(ns: NS): Promise<void> {
         }
     })
 
+    ns.tail()
+
     while (true) {
         serverList = deepScanFlat(ns, "home")
         const arr: Array<Server> = []
@@ -31,7 +33,7 @@ export async function main(ns: NS): Promise<void> {
             return (b.moneyMax || 0) - (a.moneyMax || 0)
         })
 
-        arr.slice(0, 20).forEach((h: Server) => {
+        arr.forEach((h: Server) => {
             const difficulty = (h.minDifficulty || 1) / (h.hackDifficulty || 2)
             const growth = (h.moneyAvailable || 1) / (h.moneyMax || 1)
 
