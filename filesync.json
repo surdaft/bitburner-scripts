@@ -11,7 +11,7 @@
     "dry": false,
     "definitionFile": {
         "update": true,
-        "location": "NetScriptDefinitions.d.ts"
+        "location": "NetscriptDefinitions.d.ts"
     },
     "pushAllOnConnection": true
 }
