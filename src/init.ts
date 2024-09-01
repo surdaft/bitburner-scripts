@@ -6,7 +6,8 @@ export async function main(ns: NS): Promise<void> {
         ["loop", false],
         ["backdoor", true],
         ["node", "home"],
-        ["page", []]
+        ["page", []],
+        ["loopScript", "01.1_hackLoopV3.js"]
     ])
 
     const memory: Map<string, boolean> = new Map<string, boolean>()
@@ -59,8 +60,30 @@ function execute(ns: NS, input: { [key: string]: string[] | ScriptArg; }, memory
 
     arr.forEach((s) => {
         ns.tprint("starting for ", s.hostname)
-        if (ns.run("01.1_hackLoopV2.js", 1, "--node=" + input.node, "--host=" + s.hostname) === 0) {
-            ns.tprint("ERROR: ", "did not start loop for ", s.hostname)
+        switch (input.loopScript) {
+            case "01_hackLoop.js": {
+                if (ns.run(input.loopScript, 1, s.hostname) === 0) {
+                    ns.tprint("ERROR: ", "did not start loop for ", s.hostname)
+                }
+
+                break
+            }
+
+            case "01.1_hackLoopV2.js": {
+                if (ns.run(input.loopScript, 1, "--node=" + input.node, "--host=" + s.hostname) === 0) {
+                    ns.tprint("ERROR: ", "did not start loop for ", s.hostname)
+                }
+
+                break
+            }
+
+            case "01.1_hackLoopV3.js": {
+                if (ns.run(input.loopScript, 1, "--home=" + input.node, "--target=" + s.hostname) === 0) {
+                    ns.tprint("ERROR: ", "did not start loop for ", s.hostname)
+                }
+
+                break
+            }
         }
 
         memory.set(s.hostname, true)

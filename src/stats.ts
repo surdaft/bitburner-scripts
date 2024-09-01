@@ -1,6 +1,6 @@
 import { NS, Server, ProcessInfo } from '@ns'
 import { ExtendedServer, deepScanFlat } from '/server_list'
-import { convertMiliseconds } from '/util'
+// import { convertMiliseconds } from '/util'
 
 export async function main(ns: NS): Promise<void> {
     let serverList = deepScanFlat(ns, "home")
@@ -35,11 +35,11 @@ export async function main(ns: NS): Promise<void> {
             " " + "hostname".padEnd(20, " "),
             "security".padEnd(20, " "),
             "money".padEnd(20, " "),
-            "status".padEnd(30, " "),
+            // "status".padEnd(30, " "),
         ];
 
         ns.print(headings.join(" | "))
-        ns.print("".padEnd((headings.length * 20) + 19, "-"))
+        ns.print("".padEnd((headings.length * 20) + 8, "-"))
 
         arr.sort((a: Server, b: Server) => {
             return (b.moneyMax || 0) - (a.moneyMax || 0)
@@ -52,30 +52,30 @@ export async function main(ns: NS): Promise<void> {
             const difficulty = (h.minDifficulty || 1) / (h.hackDifficulty || 2)
             const growth = (h.moneyAvailable || 1) / (h.moneyMax || 1)
 
-            let status = "-"
-            const procFile = "proc/" + h.hostname + ".json"
-            if (ns.fileExists(procFile)) {
-                try {
-                    const proc = JSON.parse(ns.read(procFile))
-                    if (proc) {
-                        if (!ns.isRunning(proc.pid)) {
-                            ns.rm(procFile)
-                        } else {
-                            status = proc.status
-                            const remainingMs = proc.duration - (now - parseInt(proc.ts))
-                            status = status.padEnd(17, " ").concat(convertMiliseconds(remainingMs).padStart(11, " "))
-                        }
-                    }
-                } catch (e) {
-                    status = "error"
-                }
-            }
+            // let status = "-"
+            // const procFile = "proc/" + h.hostname + ".json"
+            // if (ns.fileExists(procFile)) {
+            //     try {
+            //         const proc = JSON.parse(ns.read(procFile))
+            //         if (proc) {
+            //             if (!ns.isRunning(proc.pid)) {
+            //                 ns.rm(procFile)
+            //             } else {
+            //                 status = proc.status
+            //                 const remainingMs = proc.duration - (now - parseInt(proc.ts))
+            //                 status = status.padEnd(17, " ").concat(convertMiliseconds(remainingMs).padStart(11, " "))
+            //             }
+            //         }
+            //     } catch (e) {
+            //         status = "error"
+            //     }
+            // }
 
             ns.print([
                 " " + h.hostname.padEnd(20, " "),
                 ns.formatNumber(h.hackDifficulty || 0, 3).padEnd(10, " ").concat(ns.formatPercent(difficulty, 2).padStart(10)).padEnd(20, " "),
                 ns.formatNumber(h.moneyAvailable || 0, 3).padEnd(10, " ").concat(ns.formatPercent(growth, 2).padStart(10)).padEnd(20, " "),
-                status.padEnd(30, " ")
+                // status.padEnd(30, " ")
             ].join(" | "))
         })
 
