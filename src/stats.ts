@@ -1,5 +1,5 @@
 import { NS, Server, ProcessInfo } from '@ns'
-import { deepScanFlat } from '/server_list'
+import { ExtendedServer, deepScanFlat } from '/server_list'
 import { convertMiliseconds } from '/util'
 
 export async function main(ns: NS): Promise<void> {
@@ -14,10 +14,12 @@ export async function main(ns: NS): Promise<void> {
     })
 
     ns.tail()
+    ns.resizeTail(960, 500)
+    ns.setTitle("Server Stats")
 
     while (true) {
         serverList = deepScanFlat(ns, "home")
-        const arr: Array<Server> = []
+        const arr: Array<ExtendedServer> = []
 
         serverList.forEach(h => {
             if (h.purchasedByPlayer || !h.hasAdminRights || (h.moneyAvailable || 0) === 0) {
@@ -51,13 +53,18 @@ export async function main(ns: NS): Promise<void> {
             const growth = (h.moneyAvailable || 1) / (h.moneyMax || 1)
 
             let status = "-"
-            if (ns.fileExists("proc/" + h.hostname + ".json")) {
+            const procFile = "proc/" + h.hostname + ".json"
+            if (ns.fileExists(procFile)) {
                 try {
-                    const proc = JSON.parse(ns.read("proc/" + h.hostname + ".json"))
+                    const proc = JSON.parse(ns.read(procFile))
                     if (proc) {
-                        status = proc.status
-                        const remainingMs = proc.duration - (now - parseInt(proc.ts))
-                        status = status.padEnd(17, " ").concat(convertMiliseconds(remainingMs).padStart(11, " "))
+                        if (!ns.isRunning(proc.pid)) {
+                            ns.rm(procFile)
+                        } else {
+                            status = proc.status
+                            const remainingMs = proc.duration - (now - parseInt(proc.ts))
+                            status = status.padEnd(17, " ").concat(convertMiliseconds(remainingMs).padStart(11, " "))
+                        }
                     }
                 } catch (e) {
                     status = "error"

@@ -1,4 +1,4 @@
-export function convertMiliseconds(duration: number) {
+export function convertMiliseconds(duration: number): string {
     const portions: string[] = [];
 
     const msInHour = 1000 * 60 * 60;

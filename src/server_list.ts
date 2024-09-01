@@ -1,5 +1,7 @@
 import { NS, Server } from '@ns'
 
+export type ExtendedServer = Server & { parent?: Server }
+
 /**
  * List servers, ordered by max money accessible
  * @param ns
@@ -7,7 +9,7 @@ import { NS, Server } from '@ns'
 export async function main(ns: NS): Promise<void> {
     const hostList = deepScanFlat(ns, "home")
 
-    const arr: Array<Server> = []
+    const arr: Array<ExtendedServer> = []
     hostList.forEach(v => {
         if (v.hasAdminRights && !v.purchasedByPlayer) {
             arr.push(v)
@@ -15,18 +17,18 @@ export async function main(ns: NS): Promise<void> {
     })
 
     // a map cannot be sorted
-    arr.sort((a: Server, b: Server) => {
+    arr.sort((a: ExtendedServer, b: ExtendedServer) => {
         return (b.moneyMax || 0) - (a.moneyMax || 0)
     })
 
     let widest = 0
-    arr.forEach((h: Server) => {
+    arr.forEach((h: ExtendedServer) => {
         if (h.hostname.length > widest) {
             widest = h.hostname.length
         }
     })
 
-    arr.forEach((h: Server) => {
+    arr.forEach((h: ExtendedServer) => {
         ns.tprint(h.hostname.padEnd(widest, " "), " | ", ns.formatNumber(h.moneyMax || 0))
     })
 }
@@ -37,7 +39,7 @@ export async function main(ns: NS): Promise<void> {
  * @returns Tree
  */
 export function deepScan(ns: NS, host: string): Tree {
-    return _deepScan(ns, host, newFlatTree(), newTree()).hostTree
+    return _deepScan(ns, host, newFlatTree(), newTree(), undefined).hostTree
 }
 
 /**
@@ -46,7 +48,7 @@ export function deepScan(ns: NS, host: string): Tree {
  * @returns Tree
  */
 export function deepScanTree(ns: NS, host: string): Tree {
-    return _deepScan(ns, host, newFlatTree(), newTree()).hostTree
+    return _deepScan(ns, host, newFlatTree(), newTree(), undefined).hostTree
 }
 
 /**
@@ -55,22 +57,24 @@ export function deepScanTree(ns: NS, host: string): Tree {
  * @returns Tree
  */
 export function deepScanFlat(ns: NS, host: string): FlatTree {
-    return _deepScan(ns, host, newFlatTree(), newTree()).foundHosts
+    return _deepScan(ns, host, newFlatTree(), newTree(), undefined).foundHosts
 }
 
 export type Tree = Map<string, Tree>
-export type FlatTree = Map<string, Server>
+export type FlatTree = Map<string, ExtendedServer>
 
 function newTree(): Tree {
     return new Map<string, Tree>()
 }
 
 function newFlatTree(): FlatTree {
-    return new Map<string, Server>()
+    return new Map<string, ExtendedServer>()
 }
 
-function _deepScan(ns: NS, host: string, foundHosts: FlatTree, hostTree: Tree): any {
-    const hostInfo = ns.getServer(host)
+function _deepScan(ns: NS, host: string, foundHosts: FlatTree, hostTree: Tree, parent?: ExtendedServer): any {
+    const hostInfo = ns.getServer(host) as ExtendedServer
+    hostInfo.parent = parent
+
     foundHosts.set(host, hostInfo)
 
     if (!hostTree.has(host)) {
@@ -91,7 +95,7 @@ function _deepScan(ns: NS, host: string, foundHosts: FlatTree, hostTree: Tree): 
     }
 
     for (const i of hosts) {
-        const _scan = _deepScan(ns, i, foundHosts, currTree)
+        const _scan = _deepScan(ns, i, foundHosts, currTree, hostInfo)
 
         hostTree.set(host, _scan.hostTree)
     }
